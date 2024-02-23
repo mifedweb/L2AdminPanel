@@ -202,6 +202,7 @@
         <div class="task-details">
           <h3 class="task-id" th:text="${el.getId()}"></h3>
           <p class="task-name" th:text="${el.getName()}"></p>
+          <p class="owner-name" th:text="${el.getName_owner()}"></p>
           <p class="task-description" th:text="${el.getDescription()}"></p>
           <a class="full-record-link" th:href="'/task/' + ${el.getId()}"> Полная запись </a>
         </div>

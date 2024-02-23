@@ -28,4 +28,7 @@ private PasswordEncoder passwordEncoder;
 
         repository.save(user);
     }
+    public String getNameById(long id){
+        return repository.getReferenceById(id).getName();
+    }
 }

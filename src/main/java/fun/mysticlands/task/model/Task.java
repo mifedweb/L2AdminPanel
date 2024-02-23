@@ -19,10 +19,14 @@ public class Task {
     private boolean done;
     private String name;
     private String description;
+    private long id_owner;
+    private String name_owner;
 
-    public Task(String name, String description) {
+    public Task(String name, String description, long id_owner,String name_owner) {
         this.name = name;
         this.description = description;
+        this.id_owner = id_owner;
+        this.name_owner = name_owner;
     }
 
     public Task() {

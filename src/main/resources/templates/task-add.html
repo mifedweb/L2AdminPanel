@@ -156,6 +156,13 @@
         <div class="container mt-5 mb-5">
             <h1>Добавление статьи:</h1>
             <form action="/add" method="post">
+                <div class="form-group">
+                    <label for="userName">Выберите пользователя:</label>
+                    <select name="userId" class="form-control" id="userName">
+                        <!-- Здесь происходит итерация по списку пользователей и создание опции для каждого пользователя -->
+                        <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name}"></option>
+                    </select>
+                </div>
                 <input type="text" name="Name" placeholder="Введите свое имя" class="form-control"><br>
                 <textarea type="text" name="description" placeholder="Введите описание задачи" class="form-control"></textarea><br>
                 <button type="submit" class="btn btn-success">Добавить статью</button>
