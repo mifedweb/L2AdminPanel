@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -38,9 +39,16 @@ public class WebSecurityConfig{
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
-                        .authorizeHttpRequests(auth -> auth.requestMatchers("/","new-user","reg","add").permitAll()
-                                .requestMatchers("**").authenticated())
-                .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
+                        .authorizeHttpRequests(auth -> auth.requestMatchers("/**","new-user","reg","add","/assets/**").permitAll()
+                                .requestMatchers("/panel/**").hasRole("ADMIN")
+
+                        )
+
+                .formLogin((form) -> form
+                        .defaultSuccessUrl("/")
+                        .permitAll()
+                )
+                .logout(LogoutConfigurer::permitAll)
                 .build();
 
     }

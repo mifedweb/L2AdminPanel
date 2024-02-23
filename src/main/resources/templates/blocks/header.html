@@ -47,17 +47,29 @@
             <form class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto" role="search">
                 <input type="search" class="form-control" placeholder="Поиск..." aria-label="Поиск">
             </form>
-
-            <div class="text-end">
-                <a href="/reg" class="nav-link text-secondary">
+            <div th:if="${#authorization.expression('isAuthenticated()')}">
+                <p th:text="'Вы вошли под пользователем - ' + ${username}"></p>
+                <a href="/logout" class="nav-link text-secondary">
                     <button type="button" class="btn btn-light text-dark me-2">
                         <font style="vertical-align: inherit;">
-                            <font style="vertical-align: inherit;">Авторизоваться</font>
+                            <font style="vertical-align: inherit;">Выйти</font>
                         </font>
                     </button>
                 </a>
+            </div>
+            <div class="text-end" >
+                <div th:if="${#authorization.expression('!isAuthenticated()')}">
+                <a href="/login" class="nav-link text-secondary">
+                    <button type="button" class="btn btn-light text-dark me-2">
+                        <font style="vertical-align: inherit;">
+                            <font style="vertical-align: inherit;">Авторизация</font>
+                        </font>
+                    </button>
+                </a>
+                <a href="/reg" class="nav-link text-secondary">
                 <button type="button" class="btn btn-primary"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Зарегистрироваться</font></font></button>
-
+                </a>
+                </div>
             </div>
         </div>
     </div>

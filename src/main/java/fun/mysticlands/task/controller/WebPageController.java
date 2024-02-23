@@ -5,6 +5,8 @@ import fun.mysticlands.task.model.User;
 import fun.mysticlands.task.repository.TaskRepository;
 import fun.mysticlands.task.services.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,12 +34,20 @@ public class WebPageController {
     @GetMapping("/") // Этот URL будет обрабатываться этим контроллером
     public String index(Model model) {
         Iterable<Task> tasks = taskRepository.findAll();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName(); // Получаем имя аутентифицированного пользователя
+        model.addAttribute("username", username); // Передаем имя пользователя в представление
         model.addAttribute("tasks",tasks);
         model.addAttribute("name", "Index Html");
         return "index"; // Возвращает имя HTML-шаблона без расширения
     }
     @GetMapping("/add") // Этот URL будет обрабатываться этим контроллером
+
     public String addTask(Model model) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName(); // Получаем имя аутентифицированного пользователя
+        model.addAttribute("username", username); // Передаем имя пользователя в представление
         return "task-add"; // Возвращает имя HTML-шаблона без расширения
     }
     @PostMapping("/add") // Этот URL будет обрабатываться этим контроллером
