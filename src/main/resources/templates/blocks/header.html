@@ -15,9 +15,9 @@
                         </font></font></a>
                     </li>
                     <li>
-                        <a href="/reg" class="nav-link text-white">
+                        <a href="/list" class="nav-link text-white">
                             <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#home"></use></svg><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">
-                            Панель приборов
+                            Задачи
                         </font></font></a>
                     </li>
                     <li>
@@ -48,7 +48,10 @@
                 <input type="search" class="form-control" placeholder="Поиск..." aria-label="Поиск">
             </form>
             <div th:if="${#authorization.expression('isAuthenticated()')}">
-                <p th:text="'Вы вошли под пользователем - ' + ${username}"></p>
+                <p th:text="'Вы: - ' + ${username}"></p>
+
+
+
                 <a href="/logout" class="nav-link text-secondary">
                     <button type="button" class="btn btn-light text-dark me-2">
                         <font style="vertical-align: inherit;">

@@ -29,17 +29,24 @@ public class WebPageController {
 
     @GetMapping("/list") // Этот URL будет обрабатываться этим контроллером
     public String listTasks(Model model) {
-        List<Task> tasks = service.getAllTasks();
-        model.addAttribute("tasks", tasks);
-        return "tasks"; // Возвращает имя HTML-шаблона без расширения
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Iterable<Task> tasks = taskRepository.findAll()
+                .stream()
+                .filter(task -> Objects.equals(task.getOwner(), auth.getName()))
+                .toList();
+        String owner = auth.getName(); // Получаем имя аутентифицированного пользователя
+        int taskCount = taskRepository.countTasksByOwner(owner);
+        model.addAttribute("taskCount", taskCount);
+        model.addAttribute("username", owner); // Передаем имя пользователя в представление
+        model.addAttribute("tasks",tasks);
+        model.addAttribute("name", "Index Html");
+        return "task_list"; // Возвращает имя HTML-шаблона без расширения
     }
     @GetMapping("/") // Этот URL будет обрабатываться этим контроллером
     public String index(Model model) {
-        Iterable<Task> tasks = taskRepository.findAll();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName(); // Получаем имя аутентифицированного пользователя
         model.addAttribute("username", username); // Передаем имя пользователя в представление
-        model.addAttribute("tasks",tasks);
         model.addAttribute("name", "Index Html");
         return "index"; // Возвращает имя HTML-шаблона без расширения
     }
@@ -60,14 +67,14 @@ public class WebPageController {
         taskRepository.save(task);
         return "redirect:/"; // Возвращает имя HTML-шаблона без расширения
     }
-    @PostMapping("/") // Этот URL будет обрабатываться этим контроллером
+    @PostMapping("/done") // Этот URL будет обрабатываться этим контроллером
     public String TaskEnable(@RequestParam long taskId,@RequestParam(required = false) boolean completed, Model model) {
         Task task = taskRepository.getReferenceById(taskId);
         task.setDone(completed);
         //taskRepository.deleteById(taskId);
         taskRepository.save(task);
 
-        return "redirect:/"; // Возвращает имя HTML-шаблона без расширения
+        return "redirect:/list"; // Возвращает имя HTML-шаблона без расширения
     }
     @PostMapping("/deleteko") // Этот URL будет обрабатываться этим контроллером
     public String deletTask(@RequestParam long taskId, Model model) {

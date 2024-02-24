@@ -12,4 +12,5 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     void deleteById(Long id);
     Task save(Task task);
+    int countTasksByOwner(String owner);
 }

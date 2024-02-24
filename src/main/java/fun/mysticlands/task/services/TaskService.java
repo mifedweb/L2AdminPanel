@@ -10,6 +10,8 @@ public interface TaskService {
         void deleteTask(long id);
         Task getTaskById(long id);
         List<Task> getAllTasks();
+        int getCountTaskByNameOwner(String name_owner);
 
     boolean existsByIdAndDone(Long id, boolean done);
+
 }

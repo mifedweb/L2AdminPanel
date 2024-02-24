@@ -199,6 +199,7 @@
     <div class="container mt-5">
       <h1>Задачи:</h1>
       <div th:each="el : ${tasks}" class="alert alert-info mt-2 task-item">
+        <div th:if="${#authentication.getName()== el.getName_owner()}">
         <div class="task-details">
           <h3 class="task-id" th:text="${el.getId()}"></h3>
           <p class="task-name" th:text="${el.getName()}"></p>
@@ -216,6 +217,7 @@
           <input type="hidden" name="taskId" th:value="${el.getId()}"/>
           <button type="submit" class="btn btn-danger save-button delete-button">Удалить</button>
         </form>
+      </div>
       </div>
     </div>
     </div>
