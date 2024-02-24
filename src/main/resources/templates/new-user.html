@@ -69,6 +69,8 @@
         <div class="form-group"><label> Имя: <input type="text" name="name"/> </label></div>
         <div class="form-group"><label> Password: <input type="password" name="password"/> </label></div>
         <div class="form-group"><input type="submit" value="Зарегистрироваться"/></div>
+        <input type="hidden" name="role" value="ROLE_ADMIN">
+        <h3 th:text="${taskName} ? 'Регистрация успешна' : ''"></h3>
     </form>
 </div>
 </body>

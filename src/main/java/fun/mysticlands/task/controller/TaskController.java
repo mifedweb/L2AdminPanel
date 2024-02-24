@@ -3,6 +3,7 @@ package fun.mysticlands.task.controller;
 import fun.mysticlands.task.model.Task;
 import jakarta.persistence.GeneratedValue;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import fun.mysticlands.task.services.TaskService;

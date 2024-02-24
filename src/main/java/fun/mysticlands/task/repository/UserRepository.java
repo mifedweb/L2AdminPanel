@@ -16,6 +16,8 @@ import java.util.function.Function;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findUserByName(String name);
     User save(User user);
+    User getUserByName(String name);
+
 
 
 

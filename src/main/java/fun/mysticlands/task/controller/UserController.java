@@ -32,9 +32,7 @@ public class UserController {
         user.setName(name);
         user.setRoles(role);
         service.addUser(user);
-        if(user != null) {
-            model.addAttribute("task-name", "Все ок");
-        }
+        model.addAttribute("taskName", user.getName());
         return "new-user";
     }
     @GetMapping("/reg")

@@ -33,6 +33,9 @@ private PasswordEncoder passwordEncoder;
 
         repository.save(user);
     }
+    public int getCountTaskByName(String name){
+        return taskRepository.countTasksByOwner(name);
+    }
     public String getNameById(long id){
         return repository.getReferenceById(id).getName();
     }

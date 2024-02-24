@@ -1,30 +1,39 @@
 package fun.mysticlands.task.controller;
 
+import fun.mysticlands.task.impl.UserServiceImpl;
 import fun.mysticlands.task.model.Task;
 import fun.mysticlands.task.model.User;
 import fun.mysticlands.task.repository.TaskRepository;
 import fun.mysticlands.task.repository.UserRepository;
+import fun.mysticlands.task.services.NewTaskService;
 import fun.mysticlands.task.services.TaskService;
+import fun.mysticlands.task.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
 
 @Controller // Помечаем класс как контроллер для веб-страниц
 public class WebPageController {
-
+    @Autowired
+    private UserService userService;
+    @Autowired
     private final TaskService service;
 
     public WebPageController(TaskService service) {
         this.service = service;
+    }
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Произошла ошибка: " + ex.getMessage());
     }
 
     @GetMapping("/list") // Этот URL будет обрабатываться этим контроллером
@@ -35,8 +44,9 @@ public class WebPageController {
                 .filter(task -> Objects.equals(task.getOwner(), auth.getName()))
                 .toList();
         String owner = auth.getName(); // Получаем имя аутентифицированного пользователя
-        int taskCount = taskRepository.countTasksByOwner(owner);
-        model.addAttribute("taskCount", taskCount);
+        model.addAttribute("service", service);
+        model.addAttribute("user", userRepository);
+        model.addAttribute("taskCount", taskRepository);
         model.addAttribute("username", owner); // Передаем имя пользователя в представление
         model.addAttribute("tasks",tasks);
         model.addAttribute("name", "Index Html");
@@ -45,7 +55,12 @@ public class WebPageController {
     @GetMapping("/") // Этот URL будет обрабатываться этим контроллером
     public String index(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        List<User> users = userRepository.findAll();
         String username = auth.getName(); // Получаем имя аутентифицированного пользователя
+        long taskCount = taskRepository.findAll().stream().filter(task -> !task.isDone()).count();
+        model.addAttribute("users2",taskRepository);
+        model.addAttribute("users",users);
+        model.addAttribute("taskCount", taskCount);
         model.addAttribute("username", username); // Передаем имя пользователя в представление
         model.addAttribute("name", "Index Html");
         return "index"; // Возвращает имя HTML-шаблона без расширения
@@ -87,7 +102,10 @@ public class WebPageController {
         return "redirect:/"; // Возвращает имя HTML-шаблона без расширения
     }
 
-
+    @GetMapping("/files") // Этот URL будет обрабатываться этим контроллером
+    public String Files() {
+        return "files"; // Возвращает имя HTML-шаблона без расширения
+    }
 
     @Autowired
     private TaskRepository taskRepository;

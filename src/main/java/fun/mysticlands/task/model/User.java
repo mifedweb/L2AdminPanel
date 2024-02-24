@@ -1,5 +1,6 @@
 package fun.mysticlands.task.model;
 
+import fun.mysticlands.task.services.UserService;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

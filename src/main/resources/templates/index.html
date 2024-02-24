@@ -195,32 +195,20 @@
 <header th:insert="blocks/header :: header"></header>
 
   <main>
-    <div th:if="${#authorization.expression('isAuthenticated()')}">
     <div class="container mt-5">
+      <p class="task-id" th:text="'Всего задач в работе: '+ ${taskCount}"></p>
       <h1>Задачи:</h1>
-      <div th:each="el : ${tasks}" class="alert alert-info mt-2 task-item">
-        <div th:if="${#authentication.getName()== el.getName_owner()}">
+      <div th:each="user : ${users}" class="alert alert-info mt-2 task-item">
         <div class="task-details">
-          <h3 class="task-id" th:text="${el.getId()}"></h3>
-          <p class="task-name" th:text="${el.getName()}"></p>
-          <p class="owner-name" th:text="${el.getName_owner()}"></p>
-          <p class="task-description" th:text="${el.getDescription()}"></p>
-          <a class="full-record-link" th:href="'/task/' + ${el.getId()}"> Полная запись </a>
+
+          <h3 class="task-id" th:text="${user.getName()}"></h3>
+          <p class="task-name" th:text="'Всего задач: ' + ${users2.countTasksByOwner(user.getName())}"></p>
+          <p class="task-name" th:text="'Количество задач в работе (не выполненных): ' + ${users2.countTasksByOwnerAndDoneIsFalse(user.getName())}"></p>
         </div>
-        <form action="/" method="post" class="task-actions">
-          <input type="hidden" name="taskId" th:value="${el.getId()}"/>
-          <input type="checkbox" name="completed" class="checkbox-completed" th:checked="${el.isDone()}"/>
-          <label class="checkbox-label">Отметить задачу как выполненную</label>
-          <button type="submit" class="btn btn-primary save-button">Сохранить</button>
-        </form>
-        <form action="/deleteko" method="post" class="task-actions">
-          <input type="hidden" name="taskId" th:value="${el.getId()}"/>
-          <button type="submit" class="btn btn-danger save-button delete-button">Удалить</button>
-        </form>
-      </div>
       </div>
     </div>
-    </div>
+
+
 
 
   </main>

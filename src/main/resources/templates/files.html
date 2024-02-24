@@ -93,54 +93,35 @@
             display: block !important;
         }
 
-        /* Стили для контейнера задач */
-        .container {
-            margin-top: 30px;
-        }
-
-        /* Стили для заголовков */
-        h1 {
-            color: #333;
-        }
-
-        /* Стили для задач */
         .task-item {
-            background-color: #f0f0f0;
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 20px;
-            position: relative; /* Добавляем позиционирование для позиционирования элементов внутри */
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
         }
 
-        /* Стили для даты */
-        .date {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 14px; /* Размер шрифта для даты */
-            color: #999; /* Цвет для даты */
+        .task-details {
+            flex: 1; /* Растягиваем блок для занимания всего доступного пространства */
         }
 
-        /* Стили для имени */
-        .task-name {
-            text-align: center; /* Выравниваем по центру */
-            font-size: 20px; /* Размер шрифта для имени */
-            color: #333; /* Цвет для имени */
-            margin-top: 10px; /* Отступ сверху */
+        .task-actions {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-end;
         }
 
-        /* Стили для овнера */
-        .owner-name {
-            color: #007bff; /* Цвет для овнера */
-            margin-top: 5px; /* Отступ сверху */
+        .checkbox-completed {
+            align-self: flex-end; /* Перемещаем чекбокс вниз */
         }
 
-        /* Стили для описания */
-        .task-description {
-            margin-top: 20px; /* Отступ сверху */
-            font-size: 16px; /* Размер шрифта для описания */
-            color: #555; /* Цвет для описания */
+        .save-button {
+            align-self: flex-end; /* Перемещаем кнопку вниз */
         }
+
+
+
 
 
     </style>
@@ -214,69 +195,43 @@
     <header th:insert="blocks/header :: header"></header>
 
     <main>
-        <div th:if="${#authorization.expression('isAuthenticated()')}">
-            <div class="container mt-5">
-                <p class="task-id" th:text="'У вас на данный момент '+ ${taskCount.countTasksByOwnerAndDoneIsFalse(#authentication.getName())} + ' задач(и) в работе.'"></p>
-                <p class="task-id" th:text="'Общее количество задач: '+ ${taskCount.countTasksByOwner(#authentication.getName())}"></p>
-
-                <p class="task-id" th:text="'У вас на данный момент '+ ${service.countTaskByIdOwnerAndIsNoDone(user.getUserByName(#authentication.getName()).getId())} + ' задач(и) в работе.'"></p>
-                <p class="task-id" th:text="'Общее количество задач: '+ ${service.countTaskByIdOwner(user.getUserByName(#authentication.getName()).getId())}"></p>
-
-                <h1>Задачи в работе:</h1>
-                <div th:each="el : ${tasks}" >
-                    <div th:if="${user.getUserByName(#authentication.getName()).getId() == el.getId_owner()}">
-                        <div th:if="${!el.isDone()}" class="alert alert-info mt-2 task-item">
-                        <div class="task-details">
-                            <h3 class="task-id" th:text="${el.getId()}"></h3>
-                            <h3 class="date" th:text="${el.getDataFormat()}"></h3>
-                            <p class="task-name" th:text="${el.getName()}"></p>
-                            <p class="owner-name" th:text="${el.getOwner()}"></p>
-                            <p class="task-description" th:text="${el.getDescription()}"></p>
-                            <a class="full-record-link" th:href="'/task/' + ${el.getId()}"> Полная запись </a>
-                        </div>
-                        <form action="/done" method="post" class="task-actions">
-                            <input type="hidden" name="taskId" th:value="${el.getId()}"/>
-                            <input type="checkbox" name="completed" class="checkbox-completed" th:checked="${el.isDone()}"/>
-                            <label class="checkbox-label">Отметить задачу как выполненную</label>
-                            <button type="submit" class="btn btn-primary save-button">Сохранить</button>
-                        </form>
-                        <form action="/deleteko" method="post" class="task-actions">
-                            <input type="hidden" name="taskId" th:value="${el.getId()}"/>
-                            <button type="submit" class="btn btn-danger save-button delete-button">Удалить</button>
-                        </form>
-                        </div>
-                    </div>
+        <div class="container mt-5">
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <div>
+                    <label for="file">Выберите файл для загрузки:</label>
+                    <input type="file" name="file" id="file">
                 </div>
-                <h1>Задачи выполненные:</h1>
-                <div th:each="el : ${tasks}" >
-                    <div th:if="${user.getUserByName(#authentication.getName()).getId() == el.getId_owner()}">
-                        <div th:if="${el.isDone()}" class="alert alert-info mt-2 task-item">
-                            <div class="task-details">
-                                <h3 class="task-id" th:text="${el.getId()}"></h3>
-                                <h3 class="date" th:text="${el.getDataFormat()}"></h3>
-                                <p class="task-name" th:text="${el.getName()}"></p>
-                                <p class="owner-name" th:text="${el.getOwner()}"></p>
-                                <p class="task-description" th:text="${el.getDescription()}"></p>
-                                <a class="full-record-link" th:href="'/task/' + ${el.getId()}"> Полная запись </a>
-                            </div>
-                            <form action="/done" method="post" class="task-actions">
-                                <input type="hidden" name="taskId" th:value="${el.getId()}"/>
-                                <input type="checkbox" name="completed" class="checkbox-completed" th:checked="${el.isDone()}"/>
-                                <label class="checkbox-label">Отметить задачу как выполненную</label>
-                                <button type="submit" class="btn btn-primary save-button">Сохранить</button>
-                            </form>
-                            <form action="/deleteko" method="post" class="task-actions">
-                                <input type="hidden" name="taskId" th:value="${el.getId()}"/>
-                                <button type="submit" class="btn btn-danger save-button delete-button">Удалить</button>
-                            </form>
-                        </div>
-                    </div>
+                <div>
+                    <label for="description">Описание файла:</label>
+                    <input type="text" name="description" id="description">
                 </div>
+                <div>
+                    <input type="submit" value="Загрузить">
+                </div>
+            </form>
 
-
-            </div>
         </div>
+        <h2>Uploaded Files</h2>
+        <ul>
+            <!-- Используем Thymeleaf для отображения списка файлов -->
+            <li th:each="file : ${files}">
+                <!-- Выводим информацию о каждом файле -->
+                <span th:text="${file.fileName}"></span>
+            </li>
+        </ul>
 
+        <h1>Задачи в работе:</h1>
+
+        <div th:each="el : ${files}" >
+                    <div class="task-details">
+                        <h3 class="task-id" th:text="${userService.getNameById(el.getId_owner())}"></h3>
+                        <h3 class="date" th:text="${el.getLocalDateTime()}"></h3>
+                        <p class="task-name" th:text="${el.getFileName()}"></p>
+                        <p class="owner-name" th:text="${el.getOwner()}"></p>
+                        <p class="task-description" th:text="${el.getDescription()}"></p>
+                    </div>
+
+        </div>
 
     </main>
     <footer class="pt-5 my-5 text-body-secondary border-top">

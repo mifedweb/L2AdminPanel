@@ -8,9 +8,11 @@ import org.springframework.stereotype.Repository;
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
     void deleteAll();
-
-
+    int countTaskByName(String name);
+    Task getTaskById(long id);
     void deleteById(Long id);
     Task save(Task task);
     int countTasksByOwner(String owner);
+    int countTasksByOwnerAndDoneIsFalse(String owner);
+
 }
