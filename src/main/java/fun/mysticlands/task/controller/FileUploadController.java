@@ -7,8 +7,15 @@ import fun.mysticlands.task.repository.TaskRepository;
 import fun.mysticlands.task.repository.UserRepository;
 import fun.mysticlands.task.services.FileService;
 import fun.mysticlands.task.services.UserService;
+import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -20,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,52 +44,93 @@ public class FileUploadController {
     private UserService userService;
     @Autowired
     private FileServiceImpl fileService;
+    Logger logger = LoggerFactory.getLogger(FileUploadController.class);
 
-    // Путь к папке для сохранения файлов, указанный в файле application.properties
     @Value("${upload.dir}")
     private String uploadDir;
+    @GetMapping("/download")
+    public ResponseEntity<UrlResource> downloadFile(@RequestParam Long id) {
+        FileModel file = fileRepository.findById(id).orElse(null);
+        if (file != null) {
+            // Получение пути к файлу из объекта FileModel
+            Path pathToFile = Paths.get(file.getFilePath());
+            UrlResource resource;
+            try {
+                resource = new UrlResource(pathToFile.toUri());
+                if (resource.exists() && resource.isReadable()) {
+                    return ResponseEntity.ok()
+                            .contentType(MediaType.parseMediaType(file.getContentType()))
+                            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + "\"")
+                            .body(resource);
+                } else {
+                    // Обработка случая, когда файл не найден или недоступен
+                    // Возможно, стоит вернуть ResponseEntity.notFound().
+                }
+            } catch (MalformedURLException e) {
+                // Обработка ошибки, если URL файла неверный
+                // Возможно, стоит вернуть ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
+            }
+        }
+        // Обработка случая, когда файл не найден по указанному id
+        // Возможно, стоит вернуть ResponseEntity.notFound().
+        return null;
+    }
 
     @PostMapping("/upload")
-    public String uploadFile(@RequestParam("file") MultipartFile file, @RequestParam String description) {
-        // Проверка наличия файла и обработка его
+    public String uploadFile(@RequestParam("file") MultipartFile file, @RequestParam String description, @RequestParam String fileType, @RequestParam String version, Model model) {
+        String errorMessage = null;
+
         if (!file.isEmpty()) {
             try {
-                // Генерация уникального имени файла
+                FileModel.FileType fileTypeEnum = FileModel.FileType.valueOf(fileType);
                 String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-                // Путь к файлу, куда будет сохранен загруженный файл
                 Path filePath = Paths.get(uploadDir + File.separator + fileName);
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                // Сохранение файла на файловой системе
                 Files.write(filePath, file.getBytes());
 
-                // Создание объекта FileModel и сохранение информации о файле в базе данных
                 FileModel fileModel = new FileModel();
                 fileModel.setFileName(fileName);
+                fileModel.setVersion(version);
+                fileModel.setFileType(fileTypeEnum);
                 fileModel.setId_owner(userRepository.getUserByName(auth.getName()).getId());
-                fileModel.setFilePath(filePath.toString()); // Сохраняем путь к файлу
+                fileModel.setFilePath(filePath.toString());
                 fileModel.setContentType(file.getContentType());
                 fileModel.setDescription(description);
                 fileRepository.save(fileModel);
 
-                // Возвращаемся на страницу с сообщением об успешной загрузке
-                return "files";
+                return "redirect:/files";
             } catch (IOException e) {
-                e.printStackTrace();
-                // Обработка ошибки
+                errorMessage = "Ошибка при загрузке файла: " + e.getMessage();
             }
+        } else {
+            errorMessage = "Файл пустой";
         }
-        // Если файл пустой или произошла ошибка, возвращаемся на страницу загрузки с сообщением об ошибке
-        return "redirect:/uploadFailure";
-    }
-    @GetMapping("/upload")
-    public String showFileList(Model model) {
-        List<FileModel> files = fileService.findAll(); // Получаем список всех файлов из репозитория
+
+        model.addAttribute("errorMessage", errorMessage);
+        List<FileModel> files = fileRepository.findAll();
         fileService.logAllFiles();
-        model.addAttribute("fileservice", fileService); // Передаем список файлов в модель
-        model.addAttribute("files", files); // Передаем список файлов в модель
-        model.addAttribute("users", userRepository); // Передаем список файлов в модель
-        model.addAttribute("userService", userService); // Передаем список файлов в модель
-        System.out.println(files.size());
-        return "files"; // Возвращаем имя представления (HTML страницы)
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        model.addAttribute("username", username);
+        model.addAttribute("fileservice", fileService);
+        model.addAttribute("files", files);
+        model.addAttribute("users", userRepository);
+        model.addAttribute("userService", userService);
+        return "files";
+    }
+
+    @GetMapping("/files")
+    public String showFileList(Model model) {
+        List<FileModel> files = fileRepository.findAll();
+        fileService.logAllFiles();
+        files.forEach(file -> logger.info("File ID: {}, Name: {}", file.getId(), file.getFileName()));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        model.addAttribute("username", username);
+        model.addAttribute("fileservice", fileService);
+        model.addAttribute("files", files);
+        model.addAttribute("users", userRepository);
+        model.addAttribute("userService", userService);
+        return "files";
     }
 }

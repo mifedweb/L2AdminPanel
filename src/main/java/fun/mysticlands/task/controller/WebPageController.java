@@ -47,6 +47,7 @@ public class WebPageController {
         model.addAttribute("service", service);
         model.addAttribute("user", userRepository);
         model.addAttribute("taskCount", taskRepository);
+
         model.addAttribute("username", owner); // Передаем имя пользователя в представление
         model.addAttribute("tasks",tasks);
         model.addAttribute("name", "Index Html");
@@ -56,11 +57,12 @@ public class WebPageController {
     public String index(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         List<User> users = userRepository.findAll();
-        String username = auth.getName(); // Получаем имя аутентифицированного пользователя
+
         long taskCount = taskRepository.findAll().stream().filter(task -> !task.isDone()).count();
         model.addAttribute("users2",taskRepository);
         model.addAttribute("users",users);
         model.addAttribute("taskCount", taskCount);
+        String username = auth.getName(); // Получаем имя аутентифицированного пользователя
         model.addAttribute("username", username); // Передаем имя пользователя в представление
         model.addAttribute("name", "Index Html");
         return "index"; // Возвращает имя HTML-шаблона без расширения
@@ -102,10 +104,10 @@ public class WebPageController {
         return "redirect:/"; // Возвращает имя HTML-шаблона без расширения
     }
 
-    @GetMapping("/files") // Этот URL будет обрабатываться этим контроллером
-    public String Files() {
-        return "files"; // Возвращает имя HTML-шаблона без расширения
-    }
+  // @GetMapping("/files") // Этот URL будет обрабатываться этим контроллером
+  // public String Files() {
+  //     return "files"; // Возвращает имя HTML-шаблона без расширения
+  // }
 
     @Autowired
     private TaskRepository taskRepository;

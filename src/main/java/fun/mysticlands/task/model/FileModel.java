@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
@@ -30,10 +31,31 @@ public class FileModel {
     private LocalDateTime localDateTime;
     private String version;
     private String description;
+    private FileType fileType; // Добавлено перечисление для типа файла
 
     public FileModel() {
         this.localDateTime = LocalDateTime.now();
     }
+    public String getDataFormat(){
+        LocalDateTime now = localDateTime;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+        return now.format(formatter);
+    }
+    // Enum для типа файла
+    public enum FileType {
+        SERVER_FILE("Server_File"),
+        CLIENT_FILE("Client_File"),
+        OTHER_FILE("Other_File");
 
+        private final String displayName;
+
+        FileType(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
 
 }

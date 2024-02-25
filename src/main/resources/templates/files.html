@@ -120,9 +120,94 @@
             align-self: flex-end; /* Перемещаем кнопку вниз */
         }
 
+        .file-table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+            table-layout: fixed;
+        }
+
+        .file-table th, .file-table td {
+            border: 1px solid #ddd;
+            text-align: left;
+            padding: 12px;
+            word-wrap: break-word; /* добавлено, чтобы текст переносился, если он слишком длинный */
+            vertical-align: top; /* добавлено, чтобы содержимое ячеек было выровнено по верхнему краю */
+        }
+
+        .file-table th {
+            background-color: #f5f5f5;
+        }
+
+        .file-table ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .file-table li {
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            padding: 10px;
+        }
+
+        .file-table li:hover {
+            background-color: #f9f9f9;
+        }
+
+        .file-table a {
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .file-table a:hover {
+            text-decoration: underline;
+        }
+
+        /* Цветовые выделения для переменных */
+        .file-table span {
+            color: #f67436;
+        }
 
 
 
+        .upload-form {
+            width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-form label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .upload-form input[type="file"],
+        .upload-form input[type="text"],
+        .upload-form select {
+            width: calc(100% - 10px);
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .upload-form input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .upload-form input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
 
     </style>
 
@@ -179,7 +264,9 @@
         </li>
     </ul>
 </div>
-
+<div th:if="${errorMessage}" class="error-message">
+    <p th:text="${errorMessage}"></p>
+</div>
 
 <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
     <symbol id="arrow-right-circle" viewBox="0 0 16 16">
@@ -196,7 +283,7 @@
 
     <main>
         <div class="container mt-5">
-            <form action="/upload" method="post" enctype="multipart/form-data">
+            <form action="/upload" method="post" enctype="multipart/form-data" class="upload-form">
                 <div>
                     <label for="file">Выберите файл для загрузки:</label>
                     <input type="file" name="file" id="file">
@@ -206,32 +293,75 @@
                     <input type="text" name="description" id="description">
                 </div>
                 <div>
+                    <label for="version">Версия:</label>
+                    <input type="text" name="version" id="version">
+                </div>
+                <div>
+                    <label for="fileType">Тип файла:</label>
+                    <select name="fileType" id="fileType">
+                        <option value="SERVER_FILE">Серверные файлы</option>
+                        <option value="CLIENT_FILE">Клиентские файлы</option>
+                        <option value="OTHER_FILE">Другое (разное)</option>
+                    </select>
+                </div>
+                <div>
                     <input type="submit" value="Загрузить">
                 </div>
             </form>
-
         </div>
-        <h2>Uploaded Files</h2>
-        <ul>
-            <!-- Используем Thymeleaf для отображения списка файлов -->
-            <li th:each="file : ${files}">
-                <!-- Выводим информацию о каждом файле -->
-                <span th:text="${file.fileName}"></span>
-            </li>
-        </ul>
+        <h2>Файлы: </h2>
 
-        <h1>Задачи в работе:</h1>
+        <table class="file-table">
+            <tr>
+                <!-- Колонка для серверных файлов -->
+                <td>
+                    <h3>Серверные файлы</h3>
+                    <ul>
+                        <li th:each="file : ${files}" th:if="${file.fileType.getDisplayName().equals('Server_File')}">
+                            <div>
+                                <p>Имя файла: <span th:text="${file.fileName}"></span></p>
+                                <p>Загрузил: <span th:text="${userService.getNameById(file.getId_owner())}"></span></p>
+                                <p>Версия: <span th:text="${file.getVersion()}"></span></p>
+                                <p>Дата: <span th:text="${file.getDataFormat()}"></span></p>
+                                <a th:href="@{'/download?id=' + ${file.id}}">Скачать файл</a>
+                            </div>
+                        </li>
+                    </ul>
+                </td>
+                <!-- Колонка для клиентских файлов -->
+                <td>
+                    <h3>Клиентские файлы</h3>
+                    <ul>
+                        <li th:each="file : ${files}" th:if="${file.fileType.getDisplayName().equals('Client_File')}">
+                            <div>
+                                <p>Имя файла: <span th:text="${file.fileName}"></span></p>
+                                <p>Загрузил: <span th:text="${userService.getNameById(file.getId_owner())}"></span></p>
+                                <p>Версия: <span th:text="${file.getVersion()}"></span></p>
+                                <p>Дата: <span th:text="${file.getDataFormat()}"></span></p>
+                                <a th:href="@{'/download?id=' + ${file.id}}">Скачать файл</a>
+                            </div>
+                        </li>
+                    </ul>
+                </td>
+                <!-- Колонка для других файлов -->
+                <td>
+                    <h3>Другие файлы</h3>
+                    <ul>
+                        <li th:each="file : ${files}" th:if="${file.fileType.getDisplayName().equals('Other_File')}">
+                            <div>
+                                <p>Имя файла: <span th:text="${file.fileName}"></span></p>
+                                <p>Загрузил: <span th:text="${userService.getNameById(file.getId_owner())}"></span></p>
+                                <p>Версия: <span th:text="${file.getVersion()}"></span></p>
+                                <p>Дата: <span th:text="${file.getDataFormat()}"></span></p>
+                                <a th:href="@{'/download?id=' + ${file.id}}">Скачать файл</a>
+                            </div>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
 
-        <div th:each="el : ${files}" >
-                    <div class="task-details">
-                        <h3 class="task-id" th:text="${userService.getNameById(el.getId_owner())}"></h3>
-                        <h3 class="date" th:text="${el.getLocalDateTime()}"></h3>
-                        <p class="task-name" th:text="${el.getFileName()}"></p>
-                        <p class="owner-name" th:text="${el.getOwner()}"></p>
-                        <p class="task-description" th:text="${el.getDescription()}"></p>
-                    </div>
 
-        </div>
 
     </main>
     <footer class="pt-5 my-5 text-body-secondary border-top">
